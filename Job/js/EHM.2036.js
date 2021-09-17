@@ -1,0 +1,788 @@
+﻿
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Define Global variables.
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+var v_global = {
+    event: { type: null, object: null, row: null, element: null },
+    process: { param: null, entry: null, act: null, handler: null, current: {}, prev: {} },
+    logic: {}
+};
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Define gw_job_process class : ready(), UI(), procedure()
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+var gw_job_process = {
+
+    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // entry point. (pre-process section)
+    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    ready: function () {
+
+        // initialize page.
+        v_global.process.param = gw_com_module.initPage({ message: true });
+        if (gw_com_module.v_Current.menu_args=="")
+        	v_global.logic.issue_part = "AS" ;
+        else
+        	v_global.logic.issue_part = gw_com_module.v_Current.menu_args ;
+        gw_com_api.changeTheme("style_theme");
+
+        var args = {
+            request: [
+                { type: "PAGE", name: "발생구분", query: "DDDW_CM_CODE",
+                    param: [ { argument: "arg_hcode", value: "IEHM11" } ] 
+                },
+				{ type: "PAGE", name: "제품군", query: "DDDW_CM_CODE",
+				    param: [ { argument: "arg_hcode", value: "IEHM06" } ]
+				},
+				{ type: "PAGE", name: "제품유형", query: "DDDW_CM_CODE",
+				    param: [ { argument: "arg_hcode", value: "ISCM25" } ]
+				},
+                { type: "INLINE", name: "Warranty",
+                    data: [{ title: "IN", value: "IN" }, { title: "OUT", value: "OUT" }]
+                },
+                { type: "PAGE", name: "고객사", query: "dddw_cust" },
+				{ type: "PAGE", name: "LINE", query: "dddw_custline"},
+				{ type: "PAGE", name: "모듈", query: "DDDW_CM_CODED_A",
+				    param: [ { argument: "arg_hcode", value: "IEHM05" } ]
+				},
+				{ type: "PAGE", name: "교체구분", query: "DDDW_CM_CODED_A",
+				    param: [ { argument: "arg_hcode", value: "IEHM12" } ]
+				},
+				{ type: "PAGE", name: "부품상태", query: "DDDW_CM_CODE",
+				    param: [ { argument: "arg_hcode", value: "IEHM40" } ]
+				},
+				{ type: "PAGE", name: "부품군", query: "DDDW_CM_CODE",
+				    param: [ { argument: "arg_hcode", value: "IEHM29" } ]
+				},
+				{ type: "PAGE", name: "진행상태", query: "DDDW_ISSUE_STAT" },
+				{
+				    type: "PAGE", name: "DEPT_AREA_FIND", query: "dddw_deptarea",
+				    param: [{ argument: "arg_type", value: gw_com_module.v_Session.DEPT_AUTH }]
+				}
+			],
+            starter: start
+        };
+        gw_com_module.selectSet(args);
+
+        //----------
+        function start() { gw_job_process.UI(); }
+
+    },  // End of gw_job_process.ready
+
+    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // manage UI. (design section)
+    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    UI: function () {
+
+        //==== Menu : Main ====
+        var args = { targetid: "lyrMenu", type: "FREE",
+            element: [
+                    { name: "조회", value: "조회", act: true },
+                    { name: "닫기", value: "닫기" }
+            ]
+        };
+        gw_com_module.buttonMenu(args);
+
+        //==== Option : Form Main ====
+        var args = { targetid: "frmOption", type: "FREE", title: "조회 조건",
+            trans: true, show: true, border: true, remark: "lyrRemark",
+            editable: { focus: "ymd_fr", validate: true },
+            content: { row: [
+                    {
+                        element: [
+				            { name: "ymd_fr", label: { title: "발생일자 :" },
+				                style: { colfloat: "floating" }, mask: "date-ymd",
+				                editable: { type: "text", size: 7, maxlength: 10 }
+				            },
+				            { name: "ymd_to", label: { title: "~" },
+				                mask: "date-ymd",
+				                editable: { type: "text", size: 7, maxlength: 10 }
+				            },
+                            {
+                                name: "dept_area", label: { title: "장비군 :" },
+                                editable: { type: "select", size: 7, maxlength: 20, data: { memory: "DEPT_AREA_FIND" } }
+                            }
+                        ]
+                    },
+                    {
+                        element: [
+                              {
+                                  name: "issue_type", label: { title: "발생구분 :" },
+                                editable: { type: "select", 
+                                	data: { memory: "발생구분", unshift: [ { title: "전체", value: "" } ] } 
+                                }
+                            },
+                            { name: "wrnt_io", label: { title: "Warranty :" },
+                                editable: { type: "select",
+                                    data: { memory: "Warranty", unshift: [{ title: "전체", value: "%"}] }
+                                }
+                            },
+                            { name: "issue_stat", label: { title: "진행상태 :" },
+                                editable: { type: "select",
+                                    data: { memory: "진행상태", unshift: [ { title: "전체", value: "%" } ] }
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        element: [
+                            { name: "prod_group", label: { title: "제품군 :" },
+                                editable: { type: "select",
+                                    data: { memory: "제품군", unshift: [ { title: "전체", value: "%" } ] }
+                                }
+                            },
+				            { name: "prod_type1", label: { title: "제품유형 :" },
+				                editable: { type: "select",
+				                    data: { memory: "제품유형", unshift: [ { title: "전체", value: "%" } ] }
+				                }
+				            },
+				            { name: "prod_type2",
+				                editable: { type: "select",
+				                    data: { memory: "제품유형", unshift: [ { title: "전체", value: "%" } ] }
+				                }
+				            },
+				            { name: "prod_type3",
+				                editable: { type: "select",
+				                    data: { memory: "제품유형", unshift: [ { title: "전체", value: "%" } ] }
+				                }
+				            }
+				        ]
+                    },
+                    {
+                        element: [
+				            { name: "cust_cd", label: { title: "고객사 :" },
+				                editable: { type: "select",
+				                    data: { memory: "고객사", unshift: [ { title: "전체", value: "%" } ] },
+				                    change: [ { name: "cust_dept1", memory: "LINE", key: [ "cust_cd" ] }
+				                    	, { name: "cust_dept2", memory: "LINE", key: [ "cust_cd" ] }
+				                    	, { name: "cust_dept3", memory: "LINE", key: [ "cust_cd" ] } ]
+				                }
+				            },
+				            { name: "cust_dept1", label: { title: "LINE :" },
+				                editable: { type: "select",
+				                    data: { memory: "LINE", unshift: [ { title: "전체", value: "%" } ], key: [ "cust_cd" ] }
+				                }
+				            },
+				            { name: "cust_dept2",
+				                editable: { type: "select",
+				                    data: { memory: "LINE", unshift: [ { title: "전체", value: "%" } ], key: [ "cust_cd" ] }
+				                }
+				            },
+				            { name: "cust_dept3",
+				                editable: { type: "select",
+				                    data: { memory: "LINE", unshift: [ { title: "전체", value: "%" } ], key: [ "cust_cd" ] }
+				                }
+				            },
+                            { name: "cust_prod_nm", label: { title: "설비명 :" },
+                                editable: { type: "text", size: 12, maxlength: 50 }
+                            },
+                            { name: "prod_sub", label: { title: "MODULE :" },
+                                editable: { type: "select",
+                                    data: { memory: "모듈", unshift: [{ title: "전체", value: "%"}] }
+                                }
+                            }
+				        ]
+                    },
+                    {
+                        element: [
+                            { name: "change_tp", label: { title: "교체구분 :" },
+                                editable: { type: "select",
+                                    data: { memory: "교체구분", unshift: [ { title: "전체", value: "%" } ] }
+                                }
+                            },
+                            { name: "apart_tp", label: { title: "원인부품군 :" },
+                                editable: { type: "select",
+                                    data: { memory: "부품군", unshift: [ { title: "전체", value: "%" } ] }
+                                }
+                            },
+                            { name: "bpart_tp", label: { title: "교체부품군 :" },
+                                editable: { type: "select",
+                                    data: { memory: "부품군", unshift: [ { title: "전체", value: "%" } ] }
+                                }
+                            },
+                            { name: "part_stat", label: { title: "부품상태 :" },
+                                editable: { type: "select",
+                                    data: { memory: "부품상태", unshift: [ { title: "전체", value: "%" } ] }
+                                }
+                            }
+				        ]
+				    },
+                    {
+                        element: [
+				            { name: "apart_nm", label: { title: "원인부품명 :" },
+				                editable: { type: "texts", size: 30, maxlength: 100, keyword: true },
+				                tip: {color: "#505050", text: " (키워드 간에 + 입력은 AND 조건 / , 입력은 OR 조건 검색)" }
+				            },
+                            { name: "bpart_sno", label: { title: "교체부품S/N :" },
+                                editable: { type: "text", size: 20, maxlength: 40 }
+                            }
+				        ]
+                    },
+                    {
+                        element: [
+				            { name: "rmk_text", label: { title: "교체내용 :" },
+				                editable: { type: "texts", size: 50, maxlength: 100, keyword: true },
+				                tip: {color: "#505050", text: " (키워드 간에 + 입력은 AND 조건 / , 입력은 OR 조건 검색)" }
+				            },
+                            { name: "proj_no", hidden: true },
+                            { name: "change_div", hidden: true }
+				        ]
+                    },
+                    {
+                        align: "right",
+                        element: [
+                            { name: "실행", value: "실행", act: true, format: { type: "button"} },
+                            { name: "취소", value: "취소", format: { type: "button", icon: "닫기"} }
+                        ]
+                    }
+			    ]
+            }
+        };
+        //----------
+        gw_com_module.formCreate(args);
+        //=====================================================================================
+        var args = { targetid: "grdData_현황", query: "EHM_2036_M_1", title: "교체 부품 내역",
+            height: 442, show: true, selectable: true, key: true, dynamic: true, number: true,
+            element: [
+				{
+				    header: "관리번호",
+				    name: "issue_no",
+				    width: 90,
+				    align: "center"
+				},
+				{
+				    header: "발생일자",
+				    name: "issue_dt",
+				    width: 80,
+				    align: "center",
+				    mask: "date-ymd"
+				},
+				{
+				    header: "고객사",
+				    name: "cust_nm",
+				    width: 70,
+				    align: "center"
+				},
+				{
+				    header: "Line",
+				    name: "cust_dept",
+				    width: 80,
+				    align: "center"
+				},
+				{
+				    header: "고객설비명",
+				    name: "cust_prod_nm",
+				    width: 120,
+				    align: "center"
+				},
+				{ header: "제품군", name: "prod_group", width: 60, align: "center" },
+				{
+				    header: "제품유형",
+				    name: "prod_type1",
+				    width: 100,
+				    align: "center"
+				},
+				{
+				    header: "발생구분",
+				    name: "issue_tp",
+				    width: 100,
+				    align: "center"
+				},
+				{
+				    header: "발생Module",
+				    name: "prod_sub",
+				    width: 80,
+				    align: "center"
+				},
+				{
+				    header: "Warranty",
+				    name: "wrnt_io",
+				    width: 60,
+				    align: "center"
+				},
+				{
+				    header: "순번",
+				    name: "seq",
+				    width: 40,
+				    align: "center"
+				},
+				{
+				    header: "교체구분",
+				    name: "change_tp",
+				    width: 80,
+				    align: "center"
+				},
+				{
+				    header: "교체일자",
+				    name: "change_dt",
+				    width: 80,
+				    align: "center",
+				    mask: "date-ymd"
+				},
+				{
+				    header: "부품상태",
+				    name: "part_stat",
+				    width: 60,
+				    align: "center"
+				},
+				{
+				    header: "원인부품군(OUT)",
+				    name: "apart_tp",
+				    width: 110,
+				    align: "center"
+				},
+				{
+				    header: "원인부품(OUT)",
+				    name: "apart_cd",
+				    width: 120,
+				    align: "center"
+				},
+				{
+				    header: "원인부품명(OUT)",
+				    name: "apart_nm",
+				    width: 200,
+				    align: "left"
+				},
+				{
+				    header: "협력사",
+				    name: "apart_maker",
+				    width: 150,
+				    align: "left"
+				},
+				{
+				    header: "모델",
+				    name: "apart_model",
+				    width: 150,
+				    align: "center"
+				},
+				{
+				    header: "규격(REV)",
+				    name: "apart_rev",
+				    width: 150,
+				    align: "center"
+				},
+				{
+				    header: "비고(REV)",
+				    name: "apart_rmk",
+				    width: 300,
+				    align: "left"
+				},
+				{
+				    header: "OUT Ser. No(기장착부품)",
+				    name: "apart_sno",
+				    width: 150,
+				    align: "center"
+				},
+				{
+				    header: "교체부품군(IN)",
+				    name: "bpart_tp",
+				    width: 110,
+				    align: "center"
+				},
+				{
+				    header: "교체부품(IN)",
+				    name: "bpart_cd",
+				    width: 120,
+				    align: "center"
+				},
+				{
+				    header: "교체부품명(IN)",
+				    name: "bpart_nm",
+				    width: 200,
+				    align: "left"
+				},
+				{ header: "구매요청", name: "charge_cs", width: 60, align: "center" },
+				{ header: "협력사", name: "bpart_maker", width: 150, align: "left" },
+				{
+				    header: "모델",
+				    name: "bpart_model",
+				    width: 150,
+				    align: "center"
+				},
+				{
+				    header: "규격(REV)",
+				    name: "bpart_rev",
+				    width: 150,
+				    align: "center"
+				},
+				{
+				    header: "비고(REV)",
+				    name: "bpart_rmk",
+				    width: 300,
+				    align: "left"
+				},
+				{
+				    header: "IN Ser. No(교체부품)",
+				    name: "bpart_sno",
+				    width: 150,
+				    align: "center"
+				},
+				{
+				    header: "교체내용",
+				    name: "rmk",
+				    width: 700,
+				    align: "left"
+				}
+			]
+        };
+        //----------
+        gw_com_module.gridCreate(args);
+        //=====================================================================================
+        var args = {
+            target: [
+				{
+				    type: "GRID",
+				    id: "grdData_현황",
+				    offset: 8
+				}
+			]
+        };
+        //----------
+        gw_com_module.objResize(args);
+        //====================================================================================
+        gw_com_module.informSize();
+
+        //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        // go next.
+        //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+        gw_job_process.procedure();
+
+    },
+    //#endregion
+
+    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // manage process. (program section)
+    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    //#region
+    procedure: function () {
+
+        //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        // define event.
+        //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+        //----------
+        var args = {
+            targetid: "lyrMenu",
+            element: "조회",
+            event: "click",
+            handler: click_lyrMenu_조회
+        };
+        gw_com_module.eventBind(args);
+        //----------
+        var args = {
+            targetid: "lyrMenu",
+            element: "닫기",
+            event: "click",
+            handler: click_lyrMenu_닫기
+        };
+        gw_com_module.eventBind(args);
+        //----------
+        var args = {
+            targetid: "frmOption",
+            element: "실행",
+            event: "click",
+            handler: click_frmOption_실행
+        };
+        gw_com_module.eventBind(args);
+        //----------
+        var args = {
+            targetid: "frmOption",
+            element: "취소",
+            event: "click",
+            handler: click_frmOption_취소
+        };
+        gw_com_module.eventBind(args);
+        //----------
+        var args = {
+            targetid: "grdData_현황",
+            grid: true,
+            event: "rowdblclick",
+            handler: rowdblclick_grdData_현황
+        };
+        gw_com_module.eventBind(args);
+        //----------
+        var args = {
+            targetid: "grdData_현황",
+            grid: true,
+            event: "rowkeyenter",
+            handler: rowdblclick_grdData_현황
+        };
+        gw_com_module.eventBind(args);
+
+        //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        // event handler.
+        //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+        //----------
+        function click_lyrMenu_조회() {
+
+            var args = {
+                target: [
+					{
+					    id: "frmOption",
+					    focus: true
+					}
+				]
+            };
+            gw_com_module.objToggle(args);
+
+        }
+        //----------
+        function click_lyrMenu_닫기(ui) {
+
+            processClose({});
+
+        }
+        //----------
+        function click_frmOption_실행(ui) {
+
+            processRetrieve({});
+
+        }
+        //----------
+        function click_frmOption_취소(ui) {
+
+            closeOption({});
+
+        }
+        //----------
+        function rowdblclick_grdData_현황(ui) {
+
+            var args = {
+                type: "PAGE",
+                page: "DLG_ISSUE",
+                title: "문제 상세 정보",
+                width: 1100,
+                height: 500,
+                scroll: true,
+                open: true, control: true
+            };
+            if (gw_com_module.dialoguePrepare(args) == false) {
+                var args = {
+                    page: "DLG_ISSUE",
+                    param: {
+                        ID: gw_com_api.v_Stream.msg_infoAS,
+                        data: {
+                            issue_no: gw_com_api.getValue("grdData_현황", "selected", "issue_no", true)
+                        }
+                    }
+                };
+                gw_com_module.dialogueOpen(args);
+            }
+
+        }
+
+        //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        // startup process.
+        //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+        //----------
+        gw_com_api.setValue("frmOption", 1, "ymd_fr", gw_com_api.getDate("", { month: -1 }));
+        gw_com_api.setValue("frmOption", 1, "ymd_to", gw_com_api.getDate(""));
+        //----------
+        gw_com_module.startPage();
+
+    }
+    //#endregion
+
+};
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// custom function. (program section)
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+//----------
+function processRetrieve(param) {
+
+    var args = {
+        target: [
+	        {
+	            type: "FORM",
+	            id: "frmOption"
+	        }
+        ]
+    };
+    if (gw_com_module.objValidate(args) == false) return false;
+
+    var args = {
+        source: { type: "FORM", id: "frmOption", hide: true,
+            element: [
+				{ name: "ymd_fr", argument: "arg_ymd_fr" },
+				{ name: "ymd_to", argument: "arg_ymd_to" },
+				{ name: "issue_type", argument: "arg_issue_type" },
+				{ name: "wrnt_io", argument: "arg_wrnt_io" },
+				{ name: "prod_group", argument: "arg_prod_group" },
+				{ name: "prod_type1", argument: "arg_prod_type1" },
+				{ name: "prod_type2", argument: "arg_prod_type2" },
+				{ name: "prod_type3", argument: "arg_prod_type3" },
+				{ name: "cust_cd", argument: "arg_cust_cd" },
+				{ name: "cust_dept1", argument: "arg_cust_dept1" },
+				{ name: "cust_dept2", argument: "arg_cust_dept2" },
+				{ name: "cust_dept3", argument: "arg_cust_dept3" },
+				{ name: "cust_prod_nm", argument: "arg_cust_prod_nm" },
+				{ name: "prod_sub", argument: "arg_prod_sub" },
+				{ name: "proj_no", argument: "arg_proj_no" },
+				{ name: "change_div", argument: "arg_change_div" },
+				{ name: "change_tp", argument: "arg_change_tp" },
+				{ name: "part_stat", argument: "arg_part_stat" },
+				{ name: "apart_tp", argument: "arg_apart_tp" },
+				{ name: "bpart_tp", argument: "arg_bpart_tp" },
+				{ name: "apart_nm", argument: "arg_apart_nm" },
+				{ name: "bpart_sno", argument: "arg_bpart_sno" },
+				{ name: "rmk_text", argument: "arg_rmk_text" },
+				{ name: "issue_stat", argument: "arg_issue_stat" },
+                { name: "dept_area", argument: "arg_dept_area" }
+			],
+            argument: [
+                {
+                    name: "arg_issue_part",
+                    value: v_global.logic.issue_part
+                }
+			]/*,
+            remark: [
+	            {
+	                infix: "~",
+	                element: [
+	                    { name: "ymd_fr" },
+		                { name: "ymd_to" }
+		            ]
+	            },
+		        {
+		            element: [{ name: "prod_group"}]
+		        },
+		        {
+		            element: [{ name: "prod_type1"}]
+		        },
+		        {
+		            element: [{ name: "cust_cd"}]
+		        },
+                {
+                    infix: ",",
+                    element: [
+	                    { name: "cust_dept1" },
+		                { name: "cust_dept2" },
+                        { name: "cust_dept3" }
+		            ]
+                },
+		        {
+		            element: [{ name: "cust_prod_nm"}]
+		        },
+		        {
+		            element: [{ name: "proj_no"}]
+		        },
+		        {
+		            element: [{ name: "prod_sub"}]
+		        },
+		        { element: [{ name: "change_div"}] },
+		        { element: [{ name: "change_tp"}] },
+		        { element: [{ name: "part_stat"}] },
+		        { element: [{ name: "apart_tp"}] },
+		        { element: [{ name: "bpart_tp"}] },
+		        { element: [{ name: "issue_stat"}] },
+		        { element: [{ name: "apart_nm"}] },
+		        { element: [{ name: "rmk_text"}] }
+		    ]*/
+        },
+        target: [
+			{
+			    type: "GRID",
+			    id: "grdData_현황",
+			    select: true,
+			    focus: true
+			}
+		],
+        key: param.key
+    };
+    gw_com_module.objRetrieve(args);
+
+}
+//----------
+function processClose(param) {
+
+    var args = {
+        ID: gw_com_api.v_Stream.msg_closePage
+    };
+    gw_com_module.streamInterface(args);
+
+}
+//----------
+function closeOption(param) {
+
+    gw_com_api.hide("frmOption");
+
+}
+//----------
+function closeDialogue(param) {
+
+    var args = {
+        page: param.page
+    };
+    gw_com_module.dialogueClose(args);
+    if (param.focus) {
+        gw_com_api.setFocus(v_global.event.object,
+	                        v_global.event.row,
+	                        v_global.event.element,
+	                        (v_global.event.type == "GRID") ? true : false);
+    }
+
+}
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// stream handler. (network section)
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+//----------
+streamProcess = function (param) {
+
+    switch (param.ID) {
+        case gw_com_api.v_Stream.msg_showMessage:
+            {
+                gw_com_module.streamInterface(param);
+            }
+            break;
+        case gw_com_api.v_Stream.msg_resultMessage:
+            {
+                if (param.data.page != gw_com_api.getPageID())
+                    break;
+            }
+            break;
+        case gw_com_api.v_Stream.msg_openedDialogue:
+            {
+                var args = {
+                    to: {
+                        type: "POPUP",
+                        page: param.from.page
+                    }
+                };
+                switch (param.from.page) {
+                    case "DLG_ISSUE":
+                        {
+                            args.ID = gw_com_api.v_Stream.msg_infoAS;
+                            args.data = {
+                                issue_no: gw_com_api.getValue("grdData_현황", "selected", "issue_no", true)
+                            };
+                        }
+                        break;
+                }
+                gw_com_module.streamInterface(args);
+            }
+            break;
+        case gw_com_api.v_Stream.msg_closeDialogue:
+            {
+                closeDialogue({ page: param.from.page });
+            }
+            break;
+    }
+
+}
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//

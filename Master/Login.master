@@ -1,0 +1,49 @@
+﻿<%@ Master Language="C#" AutoEventWireup="true" CodeFile="Login.master.cs" Inherits="Master_Login" %>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<meta http-equiv="X-UA-Compatible" content="IE=EmulateIE10" />
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head id="Head1" runat="server">
+    <title></title>
+    <script src="../Lib/js/lib.jquery.js" type="text/javascript"></script>
+    <link href="../Style/theme-smoothness/jquery-ui-1.8.9.custom.css" rel="stylesheet"
+        type="text/css" />
+    <link href="../Style/gw.ui.css" rel="stylesheet" type="text/css" />
+    <style type="text/css">
+        body
+        {
+            font-family: '굴림체';
+            font-size: 9pt;
+        }
+        input, textarea, select
+        {
+            font-family: '굴림체';
+            font-size: 9pt;
+        }
+    </style>
+    <script src="../Lib/js/lib.ui.js" type="text/javascript"></script>
+    <script src="../Lib/js/lib.blockui.js" type="text/javascript"></script>
+    <script src="../Lib/js/lib.formui_1.js" type="text/javascript"></script>
+    <script src="../Lib/js/lib.validate_1.js" type="text/javascript"></script>
+    <script src="../Lib/js/lib.encrypt_1.js" type="text/javascript"></script>
+    <script src="../Lib/js/gw.com.module.js" type="text/javascript"></script>
+    <script src="../Lib/js/gw.com.api.js" type="text/javascript"></script>
+    <script src="../Lib/js/gw.com.langs.js" type="text/javascript"></script>
+    <script src="../Site/js/gw.com.site.js" type="text/javascript"></script>
+    <asp:ContentPlaceHolder ID="objContentHead" runat="server">
+    </asp:ContentPlaceHolder>
+</head>
+<body style="overflow: auto;">
+    <div align="center">
+        <table border="0" width="100%" style="padding: 0; margin: 0; white-space: nowrap;
+            overflow: hidden;">
+            <tr style="height: 100%; vertical-align: middle">
+                <td>
+                    <asp:ContentPlaceHolder ID="objMasterContent" runat="server">
+                    </asp:ContentPlaceHolder>
+                </td>
+            </tr>
+        </table>
+    </div>
+</body>
+</html>
