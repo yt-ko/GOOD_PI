@@ -11,6 +11,7 @@ var v_global = {
     process: { param: null, entry: null, act: null, handler: null, current: {}, prev: {} },
     data: null, logic: {}
 };
+
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // process.
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -164,11 +165,9 @@ var gw_job_process = {
 
 
 
-        //step 별 UI 생성 2021-09-14 KYT
+        //step 별 button args lyrMenu 
         switch (v_global.logic.PECM_Step) {
-
             case "rqst":
-
                 //------- lyrMenu rqst
                 var args = {
                     targetid: "lyrMenu", type: "FREE",
@@ -183,158 +182,8 @@ var gw_job_process = {
                         { name: "닫기", value: "닫기" }
                     ]
                 };
-                gw_com_module.buttonMenu(args);
-                //------ grdList_MAIN 계약현황
-                var args = {
-                    targetid: "grdList_MAIN", query: "ECM_1030_1", title: "계약현황",
-                    height: 440, show: true, caption: false, pager: true, selectable: true, number: true,// checkrow: true, multi: true,
-                    element: [
-                        {
-                            header: "체결방식", name: "cert_yn", width: 50, align: "center",
-                            format: { type: "select", data: { memory: "체결방식" } }
-                        },
-                        { header: "계약분류", name: "grp_nm", width: 100 },
-                        { header: "제목", name: "cr_title", width: 180 },
-                        { header: "계약대상", name: "cr_prod", width: 100 },
-                        { header: "계약처", name: "supp_nm", width: 120 },
-                        { header: "계약상태", name: "pstat_nm", width: 50, align: "center" },
-                        { header: "진행상태", name: "astat_nm", width: 50, align: "center" },
-                        { header: "장비군", name: "dept_area_nm", width: 60, align: "center" },
-                        { header: "담당자", name: "cr_emp_nm", width: 60, align: "center" },
-                        { header: "계약기간", name: "cr_term", width: 140 },
-                        { header: "계약일", name: "cr_date", width: 70, mask: "date-ymd", align: "center" },
-                        {
-                            header: "자동연장", name: "ext_yn", width: 60, align: "center",
-                            format: { type: "checkbox", value: "1", offval: "0" }
-                        },
-                        { header: "문서번호", name: "doc_no", width: 80, align: "center" },
-                        { header: "검토납기일", name: "chkl_date", width: 80, align: "center", mask: "date-ymd" },
-                        { header: "버전", name: "ver_no", width: 40, align: "center" },
-                        //{ header: "첨부", name: "", width: 50 },
-                        { header: "비고", name: "cr_rmk", width: 200 },
-                        { name: "doc_id", hidden: true }
-                    ]
-                };
-                gw_com_module.gridCreate(args);
-                //------ frmOption 조회조건
-                var args = {
-                    targetid: "frmOption", type: "FREE", title: "조회 조건",
-                    trans: true, border: true, show: true, remark: "lyrRemark",
-                    editable: { focus: "gpr_id", validate: true },
-                    content: {
-                        row: [
-                            {
-                                element: [
-                                    {
-                                        name: "gpr_id", label: { title: "계약분류 :" },
-                                        editable: { type: "select", data: { memory: "DOC_GRP", unshift: [{ title: "전체", value: "0" }] } }
-                                    },
-                                    {
-                                        name: "dept_area", label: { title: "장비군 :" },
-                                        editable: { type: "select", data: { memory: "ISCM81", unshift: [{ title: "전체", value: "" }] } }
-                                    },
-                                    {
-                                        name: "pstat", label: { title: "상태 :" }, style: { colfloat: "floating" },
-                                        editable: {
-                                            type: "select",
-                                            data: { memory: "ECM020", unshift: [{ title: "전체", value: "" }] },
-                                            change: [{ name: "astat", memory: "ECM030", key: ["pstat"] }]
-                                        }
-                                    },
-                                    {
-                                        name: "astat", label: { title: "" },
-                                        editable: {
-                                            type: "select",
-                                            data: { memory: "ECM030", unshift: [{ title: "전체", value: "" }], key: ["pstat"] }
-                                        }
-                                    }
-                                ]
-                            },
-                            {
-                                element: [
-                                    {
-                                        name: "date_tp", style: { colfloat: "float" },
-                                        editable: { type: "select", data: { memory: "날짜구분" } }
-                                    },
-                                    {
-                                        name: "ymd_fr", mask: "date-ymd", style: { colfloat: "floating" },
-                                        editable: { type: "text", size: 7, maxlength: 10 }
-                                    },
-                                    {
-                                        name: "ymd_to", label: { title: "~" }, mask: "date-ymd",
-                                        editable: { type: "text", size: 7, maxlength: 10 }
-                                    },
-                                    {
-                                        name: "doc_no", label: { title: "문서번호 :" },
-                                        editable: { type: "text", size: 12 }
-                                    }
-                                ]
-                            },
-                            {
-                                element: [
-                                    {
-                                        name: "cr_emp", label: { title: "담당자 :" },
-                                        editable: { type: "text", size: 7 }
-                                    },
-                                    {
-                                        name: "supp_nm", label: { title: "거래처 :" },
-                                        editable: { type: "text", size: 13 }
-                                    },
-                                    {
-                                        name: "supp_tp", label: { title: "부계약처 포함 :" },
-                                        editable: { type: "checkbox", value: "1", offval: "0" }
-                                    }
-                                ]
-                            },
-                            {
-                                element: [
-                                    {
-                                        name: "find", label: { title: "단어검색 :" },
-                                        editable: { type: "texts", size: 30, keyword: true },
-                                        tip: { text: " (키워드 간에 + 입력은 AND 조건 , 입력은 OR 조건 검색)", color: "#505050" }
-                                    },
-                                    {
-                                        name: "chk_cr_title", label: { title: "제목 :" }, value: "1",
-                                        editable: { type: "checkbox", value: "1", offval: "0", title: "제목 :", disable: true }
-                                    },
-                                    {
-                                        name: "chk_remark3", label: { title: "계약목적 :" },
-                                        editable: { type: "checkbox", value: "1", offval: "0", title: "계약목적 :" }
-                                    },
-                                    {
-                                        name: "chk_remark4", label: { title: "특이사항 :" },
-                                        editable: { type: "checkbox", value: "1", offval: "0", title: "특이사항 :" }
-                                    },
-                                    { name: "cr_title", editable: { type: "texts", size: 1, keyword: true } },
-                                    { name: "remark1", editable: { type: "texts", size: 1, keyword: true } },
-                                    { name: "remark2", editable: { type: "texts", size: 1, keyword: true } },
-                                    { name: "remark3", editable: { type: "texts", size: 1, keyword: true } },
-                                    { name: "remark4", editable: { type: "texts", size: 1, keyword: true } },
-                                    { name: "remark5", editable: { type: "texts", size: 1, keyword: true } }
-                                ]
-                            },
-                            {
-                                align: "right",
-                                element: [
-                                    { name: "실행", value: "실행", act: true, format: { type: "button" } },
-                                    { name: "취소", value: "취소", format: { type: "button", icon: "닫기" } }
-                                ]
-                            }
-                        ]
-                    }
-                };
-                gw_com_module.formCreate(args);
-                $("#frmOption_cr_title").parents(".jqTransformInputWrapper").hide();
-                $("#frmOption_remark1").parents(".jqTransformInputWrapper").hide();
-                $("#frmOption_remark2").parents(".jqTransformInputWrapper").hide();
-                $("#frmOption_remark3").parents(".jqTransformInputWrapper").hide();
-                $("#frmOption_remark4").parents(".jqTransformInputWrapper").hide();
-                $("#frmOption_remark5").parents(".jqTransformInputWrapper").hide();
-                //=====================================================================================
-
                 break
             case "chk":
-
                 //------- lyrMenu chk
                 var args = {
                     targetid: "lyrMenu", type: "FREE",
@@ -350,162 +199,8 @@ var gw_job_process = {
                         { name: "닫기", value: "닫기" }
                     ]
                 };
-                gw_com_module.buttonMenu(args);
-                //------ grdList_MAIN 계약현황
-                var args = {
-                    targetid: "grdList_MAIN", query: "ECM_1031_1", title: "계약현황",
-                    height: 500, show: true, caption: false, pager: true, selectable: true, number: true, checkrow: true, multi: true, dynamic: true,
-                    element: [
-                        {
-                            header: "체결방식", name: "cert_yn", width: 50, align: "center",
-                            format: { type: "select", data: { memory: "체결방식" } }
-                        },
-                        { header: "계약분류", name: "grp_nm", width: 100 },
-                        { header: "제목", name: "cr_title", width: 180 },
-                        { header: "계약대상", name: "cr_prod", width: 100 },
-                        { header: "계약처", name: "supp_nm", width: 120 },
-                        { header: "계약상태", name: "pstat_nm", width: 50, align: "center" },
-                        { header: "진행상태", name: "astat_nm", width: 50, align: "center" },
-                        { header: "장비군", name: "dept_area_nm", width: 60, align: "center" },
-                        { header: "담당자", name: "cr_emp_nm", width: 60, align: "center" },
-                        { header: "계약기간", name: "cr_term", width: 140 },
-                        { header: "계약일", name: "cr_date", width: 70, mask: "date-ymd", align: "center" },
-                        { header: "자동연장", name: "ext_term_nm", width: 60, align: "center" },
-                        { header: "문서번호", name: "doc_no", width: 80, align: "center" },
-                        { header: "검토납기일", name: "chkl_date", width: 70, align: "center", mask: "date-ymd" },
-                        { header: "검토의뢰일", name: "chk_req_date", width: 70, align: "center", mask: "date-ymd" },
-                        { header: "검토자", name: "chk_emp_nm", width: 60, align: "center" },
-                        { header: "검토일", name: "chk_date", width: 70, align: "center", mask: "date-ymd" },
-                        { header: "버전", name: "ver_no", width: 40, align: "center" },
-                        //{ header: "첨부", name: "", width: 50 },
-                        { header: "비고", name: "cr_rmk", width: 200 },
-                        { name: "doc_id", hidden: true },
-                        { name: "crs_date", hidden: true },
-                        { name: "cre_date", hidden: true },
-                        { name: "fr_date", hidden: true },
-                        { name: "to_date", hidden: true }
-                    ]
-                };
-                gw_com_module.gridCreate(args);
-
-                //------ frmOption 조회조건
-                var args = {
-                    targetid: "frmOption", type: "FREE", title: "조회 조건",
-                    trans: true, border: true, show: true, remark: "lyrRemark",
-                    editable: { focus: "gpr_id", validate: true },
-                    content: {
-                        row: [
-                            {
-                                element: [
-                                    {
-                                        name: "gpr_id", label: { title: "계약분류 :" },
-                                        editable: { type: "select", data: { memory: "DOC_GRP", unshift: [{ title: "전체", value: "0" }] } }
-                                    },
-                                    {
-                                        name: "dept_area", label: { title: "장비군 :" },
-                                        editable: { type: "select", data: { memory: "ISCM81", unshift: [{ title: "전체", value: "" }] } }
-                                    },
-                                    {
-                                        name: "pstat", label: { title: "상태 :" }, style: { colfloat: "floating" },
-                                        editable: {
-                                            type: "select",
-                                            data: { memory: "ECM020", unshift: [{ title: "전체", value: "" }] },
-                                            change: [{ name: "astat", memory: "ECM030", key: ["pstat"] }]
-                                        }
-                                    },
-                                    {
-                                        name: "astat", label: { title: "" },
-                                        editable: {
-                                            type: "select",
-                                            data: { memory: "ECM030", unshift: [{ title: "전체", value: "" }], key: ["pstat"] }
-                                        }
-                                    }
-                                ]
-                            },
-                            {
-                                element: [
-                                    {
-                                        name: "date_tp", style: { colfloat: "float" },
-                                        editable: { type: "select", data: { memory: "날짜구분" } }
-                                    },
-                                    {
-                                        name: "ymd_fr", mask: "date-ymd", style: { colfloat: "floating" },
-                                        editable: { type: "text", size: 7, maxlength: 10 }
-                                    },
-                                    {
-                                        name: "ymd_to", label: { title: "~" }, mask: "date-ymd",
-                                        editable: { type: "text", size: 7, maxlength: 10 }
-                                    },
-                                    {
-                                        name: "doc_no", label: { title: "문서번호 :" },
-                                        editable: { type: "text", size: 12 }
-                                    }
-                                ]
-                            },
-                            {
-                                element: [
-                                    {
-                                        name: "cr_emp", label: { title: "담당자 :" },
-                                        editable: { type: "text", size: 7 }
-                                    },
-                                    {
-                                        name: "supp_nm", label: { title: "거래처 :" },
-                                        editable: { type: "text", size: 13 }
-                                    },
-                                    {
-                                        name: "supp_tp", label: { title: "부계약처 포함 :" },
-                                        editable: { type: "checkbox", value: "1", offval: "0" }
-                                    }
-                                ]
-                            },
-                            {
-                                element: [
-                                    {
-                                        name: "find", label: { title: "단어검색 :" },
-                                        editable: { type: "texts", size: 30, keyword: true },
-                                        tip: { text: " (키워드 간에 + 입력은 AND 조건 , 입력은 OR 조건 검색)", color: "#505050" }
-                                    },
-                                    {
-                                        name: "chk_cr_title", label: { title: "제목 :" }, value: "1",
-                                        editable: { type: "checkbox", value: "1", offval: "0", title: "제목 :", disable: true }
-                                    },
-                                    {
-                                        name: "chk_remark3", label: { title: "계약목적 :" },
-                                        editable: { type: "checkbox", value: "1", offval: "0", title: "계약목적 :" }
-                                    },
-                                    {
-                                        name: "chk_remark4", label: { title: "특이사항 :" },
-                                        editable: { type: "checkbox", value: "1", offval: "0", title: "특이사항 :" }
-                                    },
-                                    { name: "cr_title", editable: { type: "texts", size: 1, keyword: true } },
-                                    { name: "remark1", editable: { type: "texts", size: 1, keyword: true } },
-                                    { name: "remark2", editable: { type: "texts", size: 1, keyword: true } },
-                                    { name: "remark3", editable: { type: "texts", size: 1, keyword: true } },
-                                    { name: "remark4", editable: { type: "texts", size: 1, keyword: true } },
-                                    { name: "remark5", editable: { type: "texts", size: 1, keyword: true } }
-                                ]
-                            },
-                            {
-                                align: "right",
-                                element: [
-                                    { name: "실행", value: "실행", act: true, format: { type: "button" } },
-                                    { name: "취소", value: "취소", format: { type: "button", icon: "닫기" } }
-                                ]
-                            }
-                        ]
-                    }
-                };
-                gw_com_module.formCreate(args);
-                $("#frmOption_cr_title").parents(".jqTransformInputWrapper").hide();
-                $("#frmOption_remark1").parents(".jqTransformInputWrapper").hide();
-                $("#frmOption_remark2").parents(".jqTransformInputWrapper").hide();
-                $("#frmOption_remark3").parents(".jqTransformInputWrapper").hide();
-                $("#frmOption_remark4").parents(".jqTransformInputWrapper").hide();
-                $("#frmOption_remark5").parents(".jqTransformInputWrapper").hide();
-                //=====================================================================================
                 break
             case "find":
-
                 //------- lyrMenu find
                 var args = {
                     targetid: "lyrMenu", type: "FREE",
@@ -516,156 +211,8 @@ var gw_job_process = {
                         { name: "닫기", value: "닫기" }
                     ]
                 };
-                gw_com_module.buttonMenu(args);
-
-                //------ grdList_MAIN 계약현황
-                var args = {
-                    targetid: "grdList_MAIN", query: "ECM_1032_1", title: "계약현황",
-                    height: 440, show: true, caption: false, pager: true, selectable: true, number: true, dynamic: true,//checkrow: true, multi: true,
-                    element: [
-                        {
-                            header: "체결방식", name: "cert_yn", width: 50, align: "center",
-                            format: { type: "select", data: { memory: "체결방식" } }
-                        },
-                        { header: "계약분류", name: "grp_nm", width: 100 },
-                        { header: "제목", name: "cr_title", width: 180 },
-                        { header: "계약대상", name: "cr_prod", width: 100 },
-                        { header: "계약처", name: "supp_nm", width: 120 },
-                        { header: "계약상태", name: "pstat_nm", width: 50, align: "center", hidden: true },
-                        { header: "진행상태", name: "astat_nm", width: 50, align: "center" },
-                        { header: "장비군", name: "dept_area_nm", width: 60, align: "center" },
-                        { header: "담당자", name: "cr_emp_nm", width: 60, align: "center" },
-                        { header: "계약기간", name: "cr_term", width: 140, align: "center" },
-                        { header: "계약일", name: "cr_date", width: 70, mask: "date-ymd", align: "center" },
-                        {
-                            header: "자동연장", name: "ext_yn", width: 60, align: "center",
-                            format: { type: "checkbox", value: "1", offval: "0" }
-                        },
-                        { header: "문서번호", name: "doc_no", width: 80, align: "center" },
-                        {
-                            header: "열람권한", name: "auth_yn", width: 60, align: "center",
-                            format: { type: "checkbox", value: "1", offval: "0" }
-                        },
-                        { header: "요청상태", name: "auth_stat_nm", width: 60, align: "center" },
-                        { header: "열람기간", name: "auth_term", width: 150, align: "center" },
-                        { header: "비고", name: "cr_rmk", width: 200 },
-                        { name: "doc_id", hidden: true }
-                    ]
-                };
-                gw_com_module.gridCreate(args);
-
-                //------ frmOption 조회조건
-                var args = {
-                    targetid: "frmOption", type: "FREE", title: "조회 조건",
-                    trans: true, border: true, show: true, remark: "lyrRemark",
-                    editable: { focus: "grp_id", validate: true },
-                    content: {
-                        row: [
-                            {
-                                element: [
-                                    {
-                                        name: "doc_lang", label: { title: "계약분류 :" },
-                                        editable: {
-                                            type: "select", data: { memory: "언어" },
-                                            change: [{ name: "grp_id", memory: "DOC_GRP", unshift: [{ title: "전체", value: "0" }], key: ["doc_lang"] }]
-                                        }
-                                    },
-                                    {
-                                        name: "grp_id", //label: { title: "" },
-                                        editable: { type: "select", data: { memory: "DOC_GRP", unshift: [{ title: "전체", value: "0" }] } }
-                                    },
-                                    {
-                                        name: "dept_area", label: { title: "장비군 :" },
-                                        editable: { type: "select", data: { memory: "ISCM81", unshift: [{ title: "전체", value: "%" }] } }
-                                    }
-                                ]
-                            },
-                            {
-                                element: [
-                                    {
-                                        name: "ymd_fr", label: { title: "계약일 :" }, mask: "date-ymd", style: { colfloat: "floating" },
-                                        editable: { type: "text", size: 7, maxlength: 10 }
-                                    },
-                                    {
-                                        name: "ymd_to", label: { title: "~" }, mask: "date-ymd",
-                                        editable: { type: "text", size: 7, maxlength: 10 }
-                                    },
-                                    {
-                                        name: "doc_no", label: { title: "문서번호 :" },
-                                        editable: { type: "text", size: 12 }
-                                    }
-                                ]
-                            },
-                            {
-                                element: [
-                                    {
-                                        name: "cr_emp", label: { title: "담당자 :" },
-                                        editable: { type: "text", size: 7 }
-                                    },
-                                    {
-                                        name: "supp_nm", label: { title: "거래처 :" },
-                                        editable: { type: "text", size: 13 }
-                                    },
-                                    {
-                                        name: "supp_tp", label: { title: "부계약처 포함 :" },
-                                        editable: { type: "checkbox", value: "1", offval: "0" }
-                                    },
-                                    {
-                                        name: "cert_yn", label: { title: "체결방식 :" },
-                                        editable: {
-                                            type: "select", data: { memory: "체결방식", unshift: [{ title: "전체", value: "%" }] }
-                                        }
-                                    }
-                                ]
-                            },
-                            {
-                                element: [
-                                    {
-                                        name: "find", label: { title: "단어검색 :" },
-                                        editable: { type: "texts", size: 30, keyword: true },
-                                        tip: { text: " (키워드 간에 + 입력은 AND 조건 , 입력은 OR 조건 검색)", color: "#505050" }
-                                    },
-                                    {
-                                        name: "chk_cr_title", label: { title: "제목 :" }, value: "1",
-                                        editable: { type: "checkbox", value: "1", offval: "0", title: "제목 :", disable: true }
-                                    },
-                                    {
-                                        name: "chk_remark3", label: { title: "계약목적 :" },
-                                        editable: { type: "checkbox", value: "1", offval: "0", title: "계약목적 :" }
-                                    },
-                                    {
-                                        name: "chk_remark4", label: { title: "특이사항 :" },
-                                        editable: { type: "checkbox", value: "1", offval: "0", title: "특이사항 :" }
-                                    },
-                                    { name: "cr_title", editable: { type: "texts", size: 1, keyword: true } },
-                                    { name: "remark1", editable: { type: "texts", size: 1, keyword: true } },
-                                    { name: "remark2", editable: { type: "texts", size: 1, keyword: true } },
-                                    { name: "remark3", editable: { type: "texts", size: 1, keyword: true } },
-                                    { name: "remark4", editable: { type: "texts", size: 1, keyword: true } },
-                                    { name: "remark5", editable: { type: "texts", size: 1, keyword: true } }
-                                ]
-                            },
-                            {
-                                align: "right",
-                                element: [
-                                    { name: "실행", value: "실행", act: true, format: { type: "button" } },
-                                    { name: "취소", value: "취소", format: { type: "button", icon: "닫기" } }
-                                ]
-                            }
-                        ]
-                    }
-                };
-                gw_com_module.formCreate(args);
-                gw_com_api.setValue("frmOption", 1, "doc_lang", gw_com_api.getValue("frmOption", 1, "doc_lang"));
-                $("#frmOption_cr_title").parents(".jqTransformInputWrapper").hide();
-                $("#frmOption_remark1").parents(".jqTransformInputWrapper").hide();
-                $("#frmOption_remark2").parents(".jqTransformInputWrapper").hide();
-                $("#frmOption_remark3").parents(".jqTransformInputWrapper").hide();
-                $("#frmOption_remark4").parents(".jqTransformInputWrapper").hide();
-                $("#frmOption_remark5").parents(".jqTransformInputWrapper").hide();
                 break
             case "mgr":
-
                 //------- lyrMenu mgr
                 var args = {
                     targetid: "lyrMenu", type: "FREE",
@@ -683,159 +230,6 @@ var gw_job_process = {
                 }
                 args.element[args.element.length] = { name: "닫기", value: "닫기" };
 
-                gw_com_module.buttonMenu(args);
-
-                //------ grdList_MAIN 계약현황
-                var args = {
-                    targetid: "grdList_MAIN", query: "ECM_1050_1", title: "계약현황",
-                    height: 500, show: true, caption: false, pager: true, selectable: true, number: true,
-                    element: [
-                        {
-                            header: "체결방식", name: "cert_yn", width: 50, align: "center",
-                            format: { type: "select", data: { memory: "체결방식" } }
-                        },
-                        { header: "계약분류", name: "grp_nm", width: 100 },
-                        { header: "제목", name: "cr_title", width: 180 },
-                        { header: "계약대상", name: "cr_prod", width: 100 },
-                        { header: "계약처", name: "supp_nm", width: 120 },
-                        { header: "계약상태", name: "pstat_nm", width: 50, align: "center" },
-                        { header: "진행상태", name: "astat_nm", width: 50, align: "center" },
-                        { header: "장비군", name: "dept_area_nm", width: 60, align: "center" },
-                        { header: "담당자", name: "cr_emp_nm", width: 60, align: "center" },
-                        { header: "계약기간", name: "cr_term", width: 140 },
-                        { header: "계약일", name: "cr_date", width: 70, mask: "date-ymd", align: "center" },
-                        { header: "자동연장", name: "ext_term_nm", width: 60, align: "center" },
-                        { header: "문서번호", name: "doc_no", width: 80, align: "center" },
-                        { header: "날인일", name: "imp_date", width: 70, mask: "date-ymd", align: "center" },
-                        { header: "이관일", name: "tr_date", width: 70, mask: "date-ymd", align: "center" },
-                        { header: "이관자", name: "tr_emp", width: 60, align: "center" },
-                        { header: "바인더", name: "binder", width: 70 },
-                        { header: "검토납기일", name: "chkl_date", width: 70, align: "center", mask: "date-ymd", hidden: true },
-                        { header: "검토의뢰일", name: "chk_req_date", width: 70, align: "center", mask: "date-ymd", hidden: true },
-                        { header: "검토자", name: "chk_emp_nm", width: 60, align: "center", hidden: true },
-                        { header: "검토일", name: "chk_date", width: 70, align: "center", mask: "date-ymd", hidden: true },
-                        { header: "버전", name: "ver_no", width: 40, align: "center", hidden: true },
-                        //{ header: "첨부", name: "", width: 50 },
-                        { header: "비고", name: "cr_rmk", width: 200 },
-                        { name: "doc_id", hidden: true }
-                    ]
-                };
-                gw_com_module.gridCreate(args);
-
-                //------ frmOption 조회조건
-                var args = {
-                    targetid: "frmOption", type: "FREE", title: "조회 조건",
-                    trans: true, border: true, show: true, remark: "lyrRemark",
-                    editable: { focus: "gpr_id", validate: true },
-                    content: {
-                        row: [
-                            {
-                                element: [
-                                    {
-                                        name: "gpr_id", label: { title: "계약분류 :" },
-                                        editable: { type: "select", data: { memory: "DOC_GRP", unshift: [{ title: "전체", value: "0" }] } }
-                                    },
-                                    {
-                                        name: "dept_area", label: { title: "장비군 :" },
-                                        editable: { type: "select", data: { memory: "ISCM81", unshift: [{ title: "전체", value: "" }] } }
-                                    },
-                                    {
-                                        name: "pstat", label: { title: "상태 :" }, style: { colfloat: "floating" },
-                                        editable: {
-                                            type: "select",
-                                            data: { memory: "ECM020", unshift: [{ title: "전체", value: "" }] },
-                                            change: [{ name: "astat", memory: "ECM030", key: ["pstat"] }]
-                                        }
-                                    },
-                                    {
-                                        name: "astat", label: { title: "" },
-                                        editable: {
-                                            type: "select",
-                                            data: { memory: "ECM030", unshift: [{ title: "전체", value: "" }], key: ["pstat"] }
-                                        }
-                                    }
-                                ]
-                            },
-                            {
-                                element: [
-                                    {
-                                        name: "date_tp", style: { colfloat: "float" },
-                                        editable: { type: "select", data: { memory: "날짜구분" } }
-                                    },
-                                    {
-                                        name: "ymd_fr", mask: "date-ymd", style: { colfloat: "floating" },
-                                        editable: { type: "text", size: 7, maxlength: 10 }
-                                    },
-                                    {
-                                        name: "ymd_to", label: { title: "~" }, mask: "date-ymd",
-                                        editable: { type: "text", size: 7, maxlength: 10 }
-                                    },
-                                    {
-                                        name: "doc_no", label: { title: "문서번호 :" },
-                                        editable: { type: "text", size: 12 }
-                                    }
-                                ]
-                            },
-                            {
-                                element: [
-                                    {
-                                        name: "cr_emp", label: { title: "담당자 :" },
-                                        editable: { type: "text", size: 7 }
-                                    },
-                                    {
-                                        name: "supp_nm", label: { title: "거래처 :" },
-                                        editable: { type: "text", size: 13 }
-                                    },
-                                    {
-                                        name: "supp_tp", label: { title: "부계약처 포함 :" },
-                                        editable: { type: "checkbox", value: "1", offval: "0" }
-                                    }
-                                ]
-                            },
-                            {
-                                element: [
-                                    {
-                                        name: "find", label: { title: "단어검색 :" },
-                                        editable: { type: "texts", size: 30, keyword: true },
-                                        tip: { text: " (키워드 간에 + 입력은 AND 조건 , 입력은 OR 조건 검색)", color: "#505050" }
-                                    },
-                                    {
-                                        name: "chk_cr_title", label: { title: "제목 :" }, value: "1",
-                                        editable: { type: "checkbox", value: "1", offval: "0", title: "제목 :", disable: true }
-                                    },
-                                    {
-                                        name: "chk_remark3", label: { title: "계약목적 :" },
-                                        editable: { type: "checkbox", value: "1", offval: "0", title: "계약목적 :" }
-                                    },
-                                    {
-                                        name: "chk_remark4", label: { title: "특이사항 :" },
-                                        editable: { type: "checkbox", value: "1", offval: "0", title: "특이사항 :" }
-                                    },
-                                    { name: "cr_title", editable: { type: "texts", size: 1, keyword: true } },
-                                    { name: "remark1", editable: { type: "texts", size: 1, keyword: true } },
-                                    { name: "remark2", editable: { type: "texts", size: 1, keyword: true } },
-                                    { name: "remark3", editable: { type: "texts", size: 1, keyword: true } },
-                                    { name: "remark4", editable: { type: "texts", size: 1, keyword: true } },
-                                    { name: "remark5", editable: { type: "texts", size: 1, keyword: true } }
-                                ]
-                            },
-                            {
-                                align: "right",
-                                element: [
-                                    { name: "실행", value: "실행", act: true, format: { type: "button" } },
-                                    { name: "취소", value: "취소", format: { type: "button", icon: "닫기" } }
-                                ]
-                            }
-                        ]
-                    }
-                };
-                gw_com_module.formCreate(args);
-                $("#frmOption_cr_title").parents(".jqTransformInputWrapper").hide();
-                $("#frmOption_remark1").parents(".jqTransformInputWrapper").hide();
-                $("#frmOption_remark2").parents(".jqTransformInputWrapper").hide();
-                $("#frmOption_remark3").parents(".jqTransformInputWrapper").hide();
-                $("#frmOption_remark4").parents(".jqTransformInputWrapper").hide();
-                $("#frmOption_remark5").parents(".jqTransformInputWrapper").hide();
                 //=====================================================================================
                 break
             case "appr":
@@ -848,8 +242,79 @@ var gw_job_process = {
                         { name: "닫기", value: "닫기" }
                     ]
                 };
-                gw_com_module.buttonMenu(args);
-                //------ grdList_MAIN 계약현황
+                break
+
+        }
+        gw_com_module.buttonMenu(args);
+
+        var args = {
+            targetid: "grdList_MAIN", query: "ECM_1030_1", title: "계약현황",
+            height: 440, show: true, caption: false, pager: true, selectable: true, number: true,// checkrow: true, multi: true,
+            element: [
+                {
+                    header: "체결방식", name: "cert_yn", width: 50, align: "center",
+                    format: { type: "select", data: { memory: "체결방식" } }
+                },
+                { header: "계약분류", name: "grp_nm", width: 100 },
+                { header: "제목", name: "cr_title", width: 180 },
+                { header: "계약대상", name: "cr_prod", width: 100 },
+                { header: "계약처", name: "supp_nm", width: 120 },
+                { header: "계약상태", name: "pstat_nm", width: 50, align: "center" },
+                { header: "진행상태", name: "astat_nm", width: 50, align: "center" },
+                { header: "장비군", name: "dept_area_nm", width: 60, align: "center" },
+                { header: "담당자", name: "cr_emp_nm", width: 60, align: "center" },
+                { header: "계약기간", name: "cr_term", width: 140 },
+                { header: "계약일", name: "cr_date", width: 70, mask: "date-ymd", align: "center" },
+                {
+                    header: "자동연장", name: "ext_yn", width: 60, align: "center",
+                    format: { type: "checkbox", value: "1", offval: "0" }
+                },
+                { header: "문서번호", name: "doc_no", width: 80, align: "center" },
+                { header: "검토납기일", name: "chkl_date", width: 80, align: "center", mask: "date-ymd" },
+                { header: "버전", name: "ver_no", width: 40, align: "center" },
+                //{ header: "첨부", name: "", width: 50 },
+                { header: "비고", name: "cr_rmk", width: 200 },
+                { name: "doc_id", hidden: true }
+            ]
+        }
+        //step 별 메인 그리드 grdList_MAIN
+        switch (v_global.logic.PECM_Step) {
+            case "chk":
+                args.query = "ECM_1031_1"
+                args.element[14] = { header: "검토의뢰일", name: "chk_req_date", width: 70, align: "center", mask: "date-ymd" }
+                args.element[15] = { header: "검토자", name: "chk_emp_nm", width: 60, align: "center" }
+                args.element[16] = { header: "검토일", name: "chk_date", width: 70, align: "center", mask: "date-ymd" }
+                args.element[17] = { header: "버전", name: "ver_no", width: 40, align: "center" }
+                args.element[18] = { header: "비고", name: "cr_rmk", width: 200 }
+                args.element[19] = { name: "crs_date", hidden: true }
+                args.element[20] = { name: "cre_date", hidden: true }
+                args.element[21] = { name: "fr_date", hidden: true }
+                args.element[22] = { name: "to_date", hidden: true }
+                break
+            case "find":
+                args.query = "ECM_1032_1"
+                args.element[13] = { header: "열람권한", name: "auth_yn", width: 60, align: "center", format: { type: "checkbox", value: "1", offval: "0" } }
+                args.element[14] = { header: "요청상태", name: "auth_stat_nm", width: 60, align: "center" }
+                args.element[15] = { header: "열람기간", name: "auth_term", width: 150, align: "center" }
+                args.element[16] = { header: "비고", name: "cr_rmk", width: 200 }
+                args.element[17] = { name: "doc_id", hidden: true }
+                break
+            case "mgr":
+                args.query = "ECM_1050_1"
+                args.element[13] = { header: "날인일", name: "imp_date", width: 70, mask: "date-ymd", align: "center" }
+                args.element[14] = { header: "이관일", name: "tr_date", width: 70, mask: "date-ymd", align: "center" }
+                args.element[15] = { header: "이관자", name: "tr_emp", width: 60, align: "center" }
+                args.element[16] = { header: "바인더", name: "binder", width: 70 }
+                args.element[17] = { header: "검토납기일", name: "chkl_date", width: 70, align: "center", mask: "date-ymd", hidden: true }
+                args.element[18] = { header: "검토의뢰일", name: "chk_req_date", width: 70, align: "center", mask: "date-ymd", hidden: true }
+                args.element[19] = { header: "검토자", name: "chk_emp_nm", width: 60, align: "center", hidden: true }
+                args.element[20] = { header: "검토일", name: "chk_date", width: 70, align: "center", mask: "date-ymd", hidden: true }
+                args.element[21] = { header: "버전", name: "ver_no", width: 40, align: "center", hidden: true }
+                //{ header: "첨부", name: "", width: 50 },
+                args.element[22] = { header: "비고", name: "cr_rmk", width: 200 }
+                args.element[23] = { name: "doc_id", hidden: true }
+                break
+            case "appr":
                 var args = {
                     targetid: "grdList_MAIN", query: (v_global.logic.Supp ? "ECM_2010_1_SUPP" : "ECM_2010_1"), title: "계약현황",
                     height: 440, show: true, caption: false, pager: true, selectable: true, number: true,
@@ -872,81 +337,295 @@ var gw_job_process = {
                         { name: "supp_cd", hidden: true }
                     ]
                 };
-                gw_com_module.gridCreate(args);
-                //------ frmOption 조회조건
-                var args = {
-                    targetid: "frmOption", type: "FREE", title: "조회 조건",
-                    trans: true, border: true, show: true, remark: "lyrRemark",
-                    editable: { focus: "pstat", validate: true },
-                    content: {
-                        row: [
-                            {
-                                element: [
-                                    {
-                                        name: "pstat", label: { title: "상태 :" },
-                                        editable: {
-                                            type: "select", data: { memory: "ECM020", unshift: [{ title: "전체", value: "" }] }
-                                        }
-                                    },
-                                    {
-                                        name: "doc_no", label: { title: "문서번호 :" },
-                                        editable: { type: "text", size: 12 }
-                                    }
-                                ]
-                            },
-                            {
-                                element: [
-                                    {
-                                        name: "ymd_fr", label: { title: "계약일 :" }, mask: "date-ymd", style: { colfloat: "floating" },
-                                        editable: { type: "text", size: 7, maxlength: 10 }
-                                    },
-                                    {
-                                        name: "ymd_to", label: { title: "~" }, mask: "date-ymd",
-                                        editable: { type: "text", size: 7, maxlength: 10 }
-                                    },
-                                    {
-                                        name: "dept_area", label: { title: "사업부 :" },
-                                        editable: { type: "select", size: 7, data: { memory: "DEPT_AREA", unshift: [{ title: "전체", value: "" }] } }
-                                    },
-                                    {
-                                        name: "supp_nm", label: { title: "협력사 :" }, mask: "search",
-                                        hidden: v_global.logic.Supp,
-                                        editable: { type: "text", size: 14, validate: { rule: "required", message: "협력사" } }
-                                    },
-                                    { name: "supp_cd", hidden: true, editable: { type: "hidden" } }
-                                ]
-                            },
-                            {
-                                element: [
-                                    {
-                                        name: "cr_title", label: { title: "단어검색 :" },
-                                        editable: { type: "texts", size: 35, keyword: true },
-                                        tip: { text: " (키워드 간에 + 입력은 AND 조건 / , 입력은 OR 조건 검색)", color: "#505050" }
-                                    }
-                                ]
-                            },
-                            {
-                                align: "right",
-                                element: [
-                                    { name: "실행", value: "실행", act: true, format: { type: "button" } },
-                                    { name: "취소", value: "취소", format: { type: "button", icon: "닫기" } }
-                                ]
-                            }
-                        ]
-
-
-                    }
-                };
-                //----------
-                gw_com_module.formCreate(args);
-
-                var args = { targetid: "frmOption", event: "itemdblclick", handler: processSearch };
-                gw_com_module.eventBind(args);
-                //----------
-                var args = { targetid: "frmOption", event: "itemkeyenter", handler: processSearch };
-                gw_com_module.eventBind(args);
+                break
         }
+        gw_com_module.gridCreate(args);
 
+
+
+        //------ frmOption 조회조건 rqst
+
+        if (v_global.logic.PECM_Step == "find") {
+            var args = {
+                targetid: "frmOption", type: "FREE", title: "조회 조건",
+                trans: true, border: true, show: true, remark: "lyrRemark",
+                editable: { focus: "grp_id", validate: true },
+                content: {
+                    row: [
+                        {
+                            element: [
+                                {
+                                    name: "doc_lang", label: { title: "계약분류 :" },
+                                    editable: {
+                                        type: "select", data: { memory: "언어" },
+                                        change: [{ name: "grp_id", memory: "DOC_GRP", unshift: [{ title: "전체", value: "0" }], key: ["doc_lang"] }]
+                                    }
+                                },
+                                {
+                                    name: "grp_id", //label: { title: "" },
+                                    editable: { type: "select", data: { memory: "DOC_GRP", unshift: [{ title: "전체", value: "0" }] } }
+                                },
+                                {
+                                    name: "dept_area", label: { title: "장비군 :" },
+                                    editable: { type: "select", data: { memory: "ISCM81", unshift: [{ title: "전체", value: "%" }] } }
+                                }
+                            ]
+                        },
+                        {
+                            element: [
+                                {
+                                    name: "ymd_fr", label: { title: "계약일 :" }, mask: "date-ymd", style: { colfloat: "floating" },
+                                    editable: { type: "text", size: 7, maxlength: 10 }
+                                },
+                                {
+                                    name: "ymd_to", label: { title: "~" }, mask: "date-ymd",
+                                    editable: { type: "text", size: 7, maxlength: 10 }
+                                },
+                                {
+                                    name: "doc_no", label: { title: "문서번호 :" },
+                                    editable: { type: "text", size: 12 }
+                                }
+                            ]
+                        },
+                        {
+                            element: [
+                                {
+                                    name: "cr_emp", label: { title: "담당자 :" },
+                                    editable: { type: "text", size: 7 }
+                                },
+                                {
+                                    name: "supp_nm", label: { title: "거래처 :" },
+                                    editable: { type: "text", size: 13 }
+                                },
+                                {
+                                    name: "supp_tp", label: { title: "부계약처 포함 :" },
+                                    editable: { type: "checkbox", value: "1", offval: "0" }
+                                },
+                                {
+                                    name: "cert_yn", label: { title: "체결방식 :" },
+                                    editable: {
+                                        type: "select", data: { memory: "체결방식", unshift: [{ title: "전체", value: "%" }] }
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            element: [
+                                {
+                                    name: "find", label: { title: "단어검색 :" },
+                                    editable: { type: "texts", size: 30, keyword: true },
+                                    tip: { text: " (키워드 간에 + 입력은 AND 조건 , 입력은 OR 조건 검색)", color: "#505050" }
+                                },
+                                {
+                                    name: "chk_cr_title", label: { title: "제목 :" }, value: "1",
+                                    editable: { type: "checkbox", value: "1", offval: "0", title: "제목 :", disable: true }
+                                },
+                                {
+                                    name: "chk_remark3", label: { title: "계약목적 :" },
+                                    editable: { type: "checkbox", value: "1", offval: "0", title: "계약목적 :" }
+                                },
+                                {
+                                    name: "chk_remark4", label: { title: "특이사항 :" },
+                                    editable: { type: "checkbox", value: "1", offval: "0", title: "특이사항 :" }
+                                },
+                                { name: "cr_title", editable: { type: "texts", size: 1, keyword: true } },
+                                { name: "remark1", editable: { type: "texts", size: 1, keyword: true } },
+                                { name: "remark2", editable: { type: "texts", size: 1, keyword: true } },
+                                { name: "remark3", editable: { type: "texts", size: 1, keyword: true } },
+                                { name: "remark4", editable: { type: "texts", size: 1, keyword: true } },
+                                { name: "remark5", editable: { type: "texts", size: 1, keyword: true } }
+                            ]
+                        },
+                        {
+                            align: "right",
+                            element: [
+                                { name: "실행", value: "실행", act: true, format: { type: "button" } },
+                                { name: "취소", value: "취소", format: { type: "button", icon: "닫기" } }
+                            ]
+                        }
+                    ]
+                }
+            };
+            gw_com_api.setValue("frmOption", 1, "doc_lang", gw_com_api.getValue("frmOption", 1, "doc_lang"));
+        } else if (v_global.logic.PECM_Step == "appr") {
+            var args = {
+                targetid: "frmOption", type: "FREE", title: "조회 조건",
+                trans: true, border: true, show: true, remark: "lyrRemark",
+                editable: { focus: "pstat", validate: true },
+                content: {
+                    row: [
+                        {
+                            element: [
+                                {
+                                    name: "pstat", label: { title: "상태 :" },
+                                    editable: {
+                                        type: "select", data: { memory: "ECM020", unshift: [{ title: "전체", value: "" }] }
+                                    }
+                                },
+                                {
+                                    name: "doc_no", label: { title: "문서번호 :" },
+                                    editable: { type: "text", size: 12 }
+                                }
+                            ]
+                        },
+                        {
+                            element: [
+                                {
+                                    name: "ymd_fr", label: { title: "계약일 :" }, mask: "date-ymd", style: { colfloat: "floating" },
+                                    editable: { type: "text", size: 7, maxlength: 10 }
+                                },
+                                {
+                                    name: "ymd_to", label: { title: "~" }, mask: "date-ymd",
+                                    editable: { type: "text", size: 7, maxlength: 10 }
+                                },
+                                {
+                                    name: "dept_area", label: { title: "사업부 :" },
+                                    editable: { type: "select", size: 7, data: { memory: "DEPT_AREA", unshift: [{ title: "전체", value: "" }] } }
+                                },
+                                {
+                                    name: "supp_nm", label: { title: "협력사 :" }, mask: "search",
+                                    hidden: v_global.logic.Supp,
+                                    editable: { type: "text", size: 14, validate: { rule: "required", message: "협력사" } }
+                                },
+                                { name: "supp_cd", hidden: true, editable: { type: "hidden" } }
+                            ]
+                        },
+                        {
+                            element: [
+                                {
+                                    name: "cr_title", label: { title: "단어검색 :" },
+                                    editable: { type: "texts", size: 35, keyword: true },
+                                    tip: { text: " (키워드 간에 + 입력은 AND 조건 / , 입력은 OR 조건 검색)", color: "#505050" }
+                                }
+                            ]
+                        },
+                        {
+                            align: "right",
+                            element: [
+                                { name: "실행", value: "실행", act: true, format: { type: "button" } },
+                                { name: "취소", value: "취소", format: { type: "button", icon: "닫기" } }
+                            ]
+                        }
+                    ]
+
+
+                }
+            };
+        } else {
+            var args = {
+                targetid: "frmOption", type: "FREE", title: "조회 조건",
+                trans: true, border: true, show: true, remark: "lyrRemark",
+                editable: { focus: "gpr_id", validate: true },
+                content: {
+                    row: [
+                        {
+                            element: [
+                                {
+                                    name: "gpr_id", label: { title: "계약분류 :" },
+                                    editable: { type: "select", data: { memory: "DOC_GRP", unshift: [{ title: "전체", value: "0" }] } }
+                                },
+                                {
+                                    name: "dept_area", label: { title: "장비군 :" },
+                                    editable: { type: "select", data: { memory: "ISCM81", unshift: [{ title: "전체", value: "" }] } }
+                                },
+                                {
+                                    name: "pstat", label: { title: "상태 :" }, style: { colfloat: "floating" },
+                                    editable: {
+                                        type: "select",
+                                        data: { memory: "ECM020", unshift: [{ title: "전체", value: "" }] },
+                                        change: [{ name: "astat", memory: "ECM030", key: ["pstat"] }]
+                                    }
+                                },
+                                {
+                                    name: "astat", label: { title: "" },
+                                    editable: {
+                                        type: "select",
+                                        data: { memory: "ECM030", unshift: [{ title: "전체", value: "" }], key: ["pstat"] }
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            element: [
+                                {
+                                    name: "date_tp", style: { colfloat: "float" },
+                                    editable: { type: "select", data: { memory: "날짜구분" } }
+                                },
+                                {
+                                    name: "ymd_fr", mask: "date-ymd", style: { colfloat: "floating" },
+                                    editable: { type: "text", size: 7, maxlength: 10 }
+                                },
+                                {
+                                    name: "ymd_to", label: { title: "~" }, mask: "date-ymd",
+                                    editable: { type: "text", size: 7, maxlength: 10 }
+                                },
+                                {
+                                    name: "doc_no", label: { title: "문서번호 :" },
+                                    editable: { type: "text", size: 12 }
+                                }
+                            ]
+                        },
+                        {
+                            element: [
+                                {
+                                    name: "cr_emp", label: { title: "담당자 :" },
+                                    editable: { type: "text", size: 7 }
+                                },
+                                {
+                                    name: "supp_nm", label: { title: "거래처 :" },
+                                    editable: { type: "text", size: 13 }
+                                },
+                                {
+                                    name: "supp_tp", label: { title: "부계약처 포함 :" },
+                                    editable: { type: "checkbox", value: "1", offval: "0" }
+                                }
+                            ]
+                        },
+                        {
+                            element: [
+                                {
+                                    name: "find", label: { title: "단어검색 :" },
+                                    editable: { type: "texts", size: 30, keyword: true },
+                                    tip: { text: " (키워드 간에 + 입력은 AND 조건 , 입력은 OR 조건 검색)", color: "#505050" }
+                                },
+                                {
+                                    name: "chk_cr_title", label: { title: "제목 :" }, value: "1",
+                                    editable: { type: "checkbox", value: "1", offval: "0", title: "제목 :", disable: true }
+                                },
+                                {
+                                    name: "chk_remark3", label: { title: "계약목적 :" },
+                                    editable: { type: "checkbox", value: "1", offval: "0", title: "계약목적 :" }
+                                },
+                                {
+                                    name: "chk_remark4", label: { title: "특이사항 :" },
+                                    editable: { type: "checkbox", value: "1", offval: "0", title: "특이사항 :" }
+                                },
+                                { name: "cr_title", editable: { type: "texts", size: 1, keyword: true } },
+                                { name: "remark1", editable: { type: "texts", size: 1, keyword: true } },
+                                { name: "remark2", editable: { type: "texts", size: 1, keyword: true } },
+                                { name: "remark3", editable: { type: "texts", size: 1, keyword: true } },
+                                { name: "remark4", editable: { type: "texts", size: 1, keyword: true } },
+                                { name: "remark5", editable: { type: "texts", size: 1, keyword: true } }
+                            ]
+                        },
+                        {
+                            align: "right",
+                            element: [
+                                { name: "실행", value: "실행", act: true, format: { type: "button" } },
+                                { name: "취소", value: "취소", format: { type: "button", icon: "닫기" } }
+                            ]
+                        }
+                    ]
+                }
+            };
+        }
+        gw_com_module.formCreate(args);
+        $("#frmOption_cr_title").parents(".jqTransformInputWrapper").hide();
+        $("#frmOption_remark1").parents(".jqTransformInputWrapper").hide();
+        $("#frmOption_remark2").parents(".jqTransformInputWrapper").hide();
+        $("#frmOption_remark3").parents(".jqTransformInputWrapper").hide();
+        $("#frmOption_remark4").parents(".jqTransformInputWrapper").hide();
+        $("#frmOption_remark5").parents(".jqTransformInputWrapper").hide();
 
         //계약연장
         var args = {
@@ -1085,6 +764,13 @@ var gw_job_process = {
         var args = { targetid: "grdList_MAIN", grid: true, event: "rowdblclick", handler: processEdit2 };
         gw_com_module.eventBind(args);
         //=====================================================================================
+        if (v_global.logic.PECM_Step == "appr") {
+            var args = { targetid: "frmOption", event: "itemdblclick", handler: processSearch };
+            gw_com_module.eventBind(args);
+            //----------
+            var args = { targetid: "frmOption", event: "itemkeyenter", handler: processSearch };
+            gw_com_module.eventBind(args);
+        }
 
     }
     //#endregion
@@ -1754,7 +1440,8 @@ function processEdit(param) {
         case "rqst": {
             var page = "PECM_Edit";
             var auth = Query.getAuth({
-                page:"ECM_1020", doc_id: param.doc_id, user_id: gw_com_module.v_Session.USR_ID });
+                page: "ECM_1020", doc_id: param.doc_id, user_id: gw_com_module.v_Session.USR_ID
+            });
 
             var title = "진행 상세";
             var args = {
@@ -1776,7 +1463,7 @@ function processEdit(param) {
         }
         case "chk": {
             var page = "PECM_Edit";
-            var auth = Query.getAuth({page: "ECM_1028", doc_id:param.doc_id, user_id: gw_com_module.v_Session.USR_ID });
+            var auth = Query.getAuth({ page: "ECM_1028", doc_id: param.doc_id, user_id: gw_com_module.v_Session.USR_ID });
 
             var title = "검토 상세";
             var args = {
@@ -1877,9 +1564,6 @@ function processEdit(param) {
         }
             break
     }
-
-
-
 
 }
 //전자계약 전용 2021-09-14 kyt
